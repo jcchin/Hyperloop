@@ -25,30 +25,25 @@ class HyperloopMonteCarlo(Assembly):
         driver.add_parameter('hyperloop.compressor_adiabatic_eff')
 
         driver.add_response('hyperloop.temp_boundary')
-        driver.add_response('hyperloop.radius_tube_outer')
+        #driver.add_response('hyperloop.radius_tube_outer')
 
-        N_SAMPLES = 10
+        N_SAMPLES = 10000
         driver.case_inputs.hyperloop.temp_outside_ambient = np.random.normal(305,10,N_SAMPLES)        
-        driver.case_inputs.hyperloop.solar_insolation = np.random.triangular(200,1000,1000,N_SAMPLES); #left, mode, right, samples
-        driver.case_inputs.hyperloop.surface_reflectance = np.random.triangular(0.5,0.7,1,N_SAMPLES);
+        driver.case_inputs.hyperloop.solar_insolation = np.random.triangular(500,1000,1000,N_SAMPLES); #left, mode, right, samples
+        driver.case_inputs.hyperloop.surface_reflectance = np.random.triangular(0.4,0.9,1,N_SAMPLES);
         driver.case_inputs.hyperloop.num_pods = np.random.normal(34,2,N_SAMPLES);
-        driver.case_inputs.hyperloop.emissivity_tube = np.random.triangular(0.4,0.4,0.9,N_SAMPLES);
+        driver.case_inputs.hyperloop.emissivity_tube = np.random.triangular(0.4,0.5,0.9,N_SAMPLES);
         driver.case_inputs.hyperloop.Nu_multiplier = np.random.triangular(0.9,1,3,N_SAMPLES);
         driver.case_inputs.hyperloop.compressor_adiabatic_eff = np.random.triangular(0.6,0.69,0.8,N_SAMPLES);
-
-        # driver.case_inputs.hyperloop.temp_outside_ambient = np.random.normal(305,10,N_SAMPLES)        
-        # driver.case_inputs.hyperloop.solar_insolation = np.random.triangular(500,1000,1000,N_SAMPLES); #left, mode, right, samples
-        # driver.case_inputs.hyperloop.surface_reflectance = np.random.triangular(0.7,0.85,1,N_SAMPLES);
-        # driver.case_inputs.hyperloop.num_pods = np.random.normal(34,2,N_SAMPLES);
-        # driver.case_inputs.hyperloop.emissivity_tube = np.random.triangular(0.4,0.4,0.6,N_SAMPLES);
-        # driver.case_inputs.hyperloop.Nu_multiplier = np.random.triangular(0.9,1,3,N_SAMPLES);
-        # driver.case_inputs.hyperloop.compressor_adiabatic_eff = np.random.triangular(0.6,0.69,0.8,N_SAMPLES);
 
         timestamp = time.strftime("%Y%m%d%H%M%S")
         self.recorders = [BSONCaseRecorder('therm_mc_%s.bson'%timestamp)]
 
 class MiniHyperloop(Assembly): 
     """ Abriged Hyperloop Model """ 
+
+    temp_boundary = Float(0, iotype="out", desc="final equilibirum tube wall temperature")
+
     def configure(self): 
         #Add Components
         self.add('tubeTemp', TubeWallTemp2())
@@ -59,20 +54,17 @@ class MiniHyperloop(Assembly):
 
         #Boundary Input Connections
         #Hyperloop -> Compressor
-        self.create_passthrough('comp.compressor_adiabatic_eff')
-
+        self.connect('tubeTemp.temp_boundary','temp_boundary')
+        self.create_passthrough('tubeTemp.compressor_adiabatic_eff')
+        #self.create_passthrough('tubeTemp.temp_boundary')
         #Hyperloop -> TubeWallTemp
-        self.create_passthrough('tube_wall_temp.temp_outside_ambient')
-        self.create_passthrough('tube_wall_temp.solar_insolation')
-        self.create_passthrough('tube_wall_temp.surface_reflectance')
-        self.create_passthrough('tube_wall_temp.num_pods')
-        self.create_passthrough('tube_wall_temp.emissivity_tube')
-        self.create_passthrough('tube_wall_temp.Nu_multiplier')
+        self.create_passthrough('tubeTemp.temp_outside_ambient')
+        self.create_passthrough('tubeTemp.solar_insolation')
+        self.create_passthrough('tubeTemp.surface_reflectance')
+        self.create_passthrough('tubeTemp.num_pods')
+        self.create_passthrough('tubeTemp.emissivity_tube')
+        self.create_passthrough('tubeTemp.Nu_multiplier')
 
-        #Inter-component Connections
-        #Compress -> TubeWallTemp
-        self.connect('comp.nozzle_Fl_O', 'tube_wall_temp.nozzle_air')
-        self.connect('comp.bearing_Fl_O', 'tube_wall_temp.bearing_air')
 
 class TubeWallTemp2(Component):
     """ [Tweaked from original to include simple comp calcs] Calculates Q released/absorbed by the hyperloop tube """
@@ -138,22 +130,27 @@ class TubeWallTemp2(Component):
     #Residual (for solver)
     ss_temp_residual = Float(units = 'K', iotype='out', desc='Residual of T_released - T_absorbed')
   
+    failures = Float(0,iotype='out', desc='invalid run cases (temp goes negative)')
     def execute(self):
         """Calculate Various Paramters"""
 
         #New Simple Compressor Calcs
-        self.inlet_Tt = self.tubeTemp*(1+0.2*self.pod_MN**2)
+        self.inlet_Tt = self.temp_boundary*(1+0.2*self.pod_MN**2)
         self.inlet_Pt = self.tube_P*(1+0.2*self.pod_MN**2)**3.5
 
         self.exit_Tt = self.inlet_Tt*(1 + (1/self.compressor_adiabatic_eff)*(self.compPR**(1/3.5)-1) )
         self.exit_Pt = self.inlet_Pt * self.compPR
 
-        if(self.exit_Tt<400):
+
+        if (self.exit_Tt<0):
+            self.failures +=1
+            print self.temp_boundary, "failures: ", self.failures
+        elif(self.exit_Tt<400):
             self.cp_air = 990.8*self.exit_Tt**(0.00316)
         else:
             self.cp_air = 299.4*self.exit_Tt**(0.1962)
         
-        self.heat_rate_pod = self.W*self.cp_air*(self.exit_Tt-self.temp_boundary)
+        self.heat_rate_pod = self.Wdot*self.cp_air*(self.exit_Tt-self.temp_boundary)
         #----
         self.diameter_outer_tube = 2*self.radius_outer_tube
         #bearing_q = cu(self.bearing_air.W,'lbm/s','kg/s') * cu(self.bearing_air.Cp,'Btu/(lbm*degR)','J/(kg*K)') * (cu(self.bearing_air.Tt,'degR','degK') - self.temp_boundary)
@@ -225,16 +222,16 @@ if __name__ == "__main__":
     hl_mc = HyperloopMonteCarlo()
 
     #parameters
-    hl_mc.hyperloop.Mach_bypass = .95
-    hl_mc.hyperloop.Mach_pod_max = .8
-    hl_mc.hyperloop.Mach_c1_in = .65
-    hl_mc.hyperloop.c1_PR_des = 13
+    #hl_mc.hyperloop.Mach_bypass = .95
+    #hl_mc.hyperloop.Mach_pod_max = .8
+    #hl_mc.hyperloop.Mach_c1_in = .65
+    #hl_mc.hyperloop.c1_PR_des = 13
 
     #initial guesses
-    hl_mc.hyperloop.compress.W_in = .38
-    hl_mc.hyperloop.flow_limit.radius_tube = hl_mc.hyperloop.pod.radius_tube_inner = 243
-    hl_mc.hyperloop.compress.Ts_tube = hl_mc.hyperloop.flow_limit.Ts_tube = hl_mc.hyperloop.tube_wall_temp.tubeWallTemp = 322.28
-    hl_mc.hyperloop.compress.c2_PR_des = 8.72
+    #hl_mc.hyperloop.compress.W_in = .38
+    #hl_mc.hyperloop.flow_limit.radius_tube = hl_mc.hyperloop.pod.radius_tube_inner = 243
+    #hl_mc.hyperloop.compress.Ts_tube = hl_mc.hyperloop.flow_limit.Ts_tube = hl_mc.hyperloop.tube_wall_temp.tubeWallTemp = 322.28
+    #hl_mc.hyperloop.compress.c2_PR_des = 8.72
 
     #initial run to converge things
     hl_mc.run()
