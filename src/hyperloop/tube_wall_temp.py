@@ -24,7 +24,7 @@ class TubeWallTemp(Component):
     #Hyperloop Parameters/Design Variables
     radius_outer_tube = Float(1.115, units = 'm', iotype='in', desc='tube outer diameter') #7.3ft
     length_tube = Float(482803, units = 'm', iotype='in', desc='Length of entire Hyperloop') #300 miles, 1584000ft
-    num_pods = Float(34, units = 'K', iotype='in', desc='Number of Pods in the Tube at a given time') #
+    num_pods = Float(34, iotype='in', desc='Number of Pods in the Tube at a given time') #
     temp_boundary = Float(322.0, units = 'K', iotype='in', desc='Average Temperature of the tube wall') #
     temp_outside_ambient = Float(305.6, units = 'K', iotype='in', desc='Average Temperature of the outside air') #
     nozzle_air = FlowStationVar(iotype="in", desc="air exiting the pod nozzle", copy=None)
