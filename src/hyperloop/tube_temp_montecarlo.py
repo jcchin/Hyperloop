@@ -3,13 +3,17 @@ import time
 
 import numpy as np
 from math import log, pi, sqrt, e
+from matplotlib import pylab as plt
 
 from openmdao.main.api import Assembly, Component
-from openmdao.lib.datatypes.api import Float, Bool
+from openmdao.lib.datatypes.api import Float, Bool, Str
 from openmdao.lib.drivers.api import CaseIteratorDriver, BroydenSolver
-from openmdao.lib.casehandlers.api import BSONCaseRecorder
+from openmdao.lib.casehandlers.api import BSONCaseRecorder, CaseDataset
 
-class HyperloopMonteCarlo(Assembly): 
+class HyperloopMonteCarlo(Assembly):
+
+    #output
+    timestamp = Str(iotype='out',desc='timestamp for output filename')
 
     def configure(self): 
 
@@ -29,15 +33,16 @@ class HyperloopMonteCarlo(Assembly):
 
         N_SAMPLES = 10000
         driver.case_inputs.hyperloop.temp_outside_ambient = np.random.normal(305,10,N_SAMPLES)        
-        driver.case_inputs.hyperloop.solar_insolation = np.random.triangular(500,1000,1000,N_SAMPLES); #left, mode, right, samples
-        driver.case_inputs.hyperloop.surface_reflectance = np.random.triangular(0.4,0.9,1,N_SAMPLES);
+        driver.case_inputs.hyperloop.solar_insolation = np.random.triangular(200,1000,1000,N_SAMPLES); #left, mode, right, samples
+        driver.case_inputs.hyperloop.c_solar = np.random.triangular(0.5,0.7,1,N_SAMPLES);
+        driver.case_inputs.hyperloop.surface_reflectance = np.random.triangular(0.4,0.5,0.9,N_SAMPLES);
         driver.case_inputs.hyperloop.num_pods = np.random.normal(34,2,N_SAMPLES);
         driver.case_inputs.hyperloop.emissivity_tube = np.random.triangular(0.4,0.5,0.9,N_SAMPLES);
         driver.case_inputs.hyperloop.Nu_multiplier = np.random.triangular(0.9,1,3,N_SAMPLES);
         driver.case_inputs.hyperloop.compressor_adiabatic_eff = np.random.triangular(0.6,0.69,0.8,N_SAMPLES);
 
-        timestamp = time.strftime("%Y%m%d%H%M%S")
-        self.recorders = [BSONCaseRecorder('therm_mc_%s.bson'%timestamp)]
+        self.timestamp = time.strftime("%Y%m%d%H%M%S")
+        self.recorders = [BSONCaseRecorder('therm_mc_%s.bson'%self.timestamp)]
 
 class MiniHyperloop(Assembly): 
     """ Abriged Hyperloop Model """ 
@@ -58,6 +63,7 @@ class MiniHyperloop(Assembly):
         self.create_passthrough('tubeTemp.compressor_adiabatic_eff')
         #self.create_passthrough('tubeTemp.temp_boundary')
         #Hyperloop -> TubeWallTemp
+        self.create_passthrough('tubeTemp.c_solar')
         self.create_passthrough('tubeTemp.temp_outside_ambient')
         self.create_passthrough('tubeTemp.solar_insolation')
         self.create_passthrough('tubeTemp.surface_reflectance')
@@ -94,6 +100,7 @@ class TubeWallTemp2(Component):
 
     #constants
     solar_insolation = Float(1000., iotype="in", units = 'W/m**2', desc='solar irradiation at sea level on a clear day') #
+    c_solar = Float(1, iotype='in', desc='irradiance adjustment factor')
     nn_incidence_factor = Float(0.7, iotype="in", desc='Non-normal incidence factor') #
     surface_reflectance = Float(0.5, iotype="in", desc='Solar Reflectance Index') #
     q_per_area_solar = Float(350., units = 'W/m**2', desc='Solar Heat Rate Absorbed per Area') #
@@ -201,7 +208,7 @@ class TubeWallTemp2(Component):
         #Determine heat incoming via Sun radiation (Incidence Flux)
         #Sun hits an effective rectangular cross section
         self.area_viewing = self.length_tube* self.diameter_outer_tube
-        self.q_per_area_solar = (1-self.surface_reflectance)* self.nn_incidence_factor * self.solar_insolation
+        self.q_per_area_solar = (1-self.surface_reflectance)* self.c_solar * self.solar_insolation
         self.q_total_solar = self.q_per_area_solar * self.area_viewing
         #Determine heat released via radiation
         #Radiative area = surface area
@@ -235,5 +242,22 @@ if __name__ == "__main__":
 
     #initial run to converge things
     hl_mc.run()
+
+    #plot
+    if (True):
+        cds = CaseDataset('therm_mc_%s.bson'%hl_mc.timestamp, 'bson')
+        data = cds.data.driver('driver').by_variable().fetch()
+        #temp
+        temp_boundary_k = data['hyperloop.temp_boundary']
+        temp_boundary = [((x-273.15)*1.8 + 32) for x in temp_boundary_k]
+        #histogram
+        n, bins, patches = plt.hist(temp_boundary, 50, normed=1, histtype='stepfilled')
+        plt.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
+        #stats
+        mode = np.average(temp_boundary)
+        std = np.std(temp_boundary)
+        percentile = np.percentile(temp_boundary,85)
+        print "mode: ", mode, " std: ", std, " 85percentile: ", percentile
+        plt.show()
 
 
