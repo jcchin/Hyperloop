@@ -4,6 +4,7 @@ import time
 import numpy as np
 from math import log, pi, sqrt, e
 from matplotlib import pylab as plt
+from matplotlib import mlab as mlab
 
 from openmdao.main.api import Assembly, Component
 from openmdao.lib.datatypes.api import Float, Bool, Str
@@ -32,7 +33,7 @@ class HyperloopMonteCarlo(Assembly):
         #driver.add_response('hyperloop.radius_tube_outer')
 
         N_SAMPLES = 10000
-        driver.case_inputs.hyperloop.temp_outside_ambient = np.random.normal(305,10,N_SAMPLES)        
+        driver.case_inputs.hyperloop.temp_outside_ambient = np.random.normal(305,7,N_SAMPLES)        
         driver.case_inputs.hyperloop.solar_insolation = np.random.triangular(200,1000,1000,N_SAMPLES); #left, mode, right, samples
         driver.case_inputs.hyperloop.c_solar = np.random.triangular(0.5,0.7,1,N_SAMPLES);
         driver.case_inputs.hyperloop.surface_reflectance = np.random.triangular(0.4,0.5,0.9,N_SAMPLES);
@@ -90,7 +91,7 @@ class TubeWallTemp2(Component):
     pod_heat = Float(356149., units='W', iotype='out', desc='Heating due to a single capsule')
     #--Inputs--
     #Hyperloop Parameters/Design Variables
-    radius_outer_tube = Float(1.115, units = 'm', iotype='in', desc='tube outer diameter') #7.3ft
+    radius_outer_tube = Float(1.08823, units = 'm', iotype='in', desc='tube outer diameter') #7.3ft 1.115
     length_tube = Float(482803, units = 'm', iotype='in', desc='Length of entire Hyperloop') #300 miles, 1584000ft
     num_pods = Float(34, iotype='in', desc='Number of Pods in the Tube at a given time') #
     temp_boundary = Float(322.0, units = 'K', iotype='in', desc='Average Temperature of the tube wall') #
@@ -228,18 +229,6 @@ if __name__ == "__main__":
 
     hl_mc = HyperloopMonteCarlo()
 
-    #parameters
-    #hl_mc.hyperloop.Mach_bypass = .95
-    #hl_mc.hyperloop.Mach_pod_max = .8
-    #hl_mc.hyperloop.Mach_c1_in = .65
-    #hl_mc.hyperloop.c1_PR_des = 13
-
-    #initial guesses
-    #hl_mc.hyperloop.compress.W_in = .38
-    #hl_mc.hyperloop.flow_limit.radius_tube = hl_mc.hyperloop.pod.radius_tube_inner = 243
-    #hl_mc.hyperloop.compress.Ts_tube = hl_mc.hyperloop.flow_limit.Ts_tube = hl_mc.hyperloop.tube_wall_temp.tubeWallTemp = 322.28
-    #hl_mc.hyperloop.compress.c2_PR_des = 8.72
-
     #initial run to converge things
     hl_mc.run()
 
@@ -253,11 +242,14 @@ if __name__ == "__main__":
         #histogram
         n, bins, patches = plt.hist(temp_boundary, 50, normed=1, histtype='stepfilled')
         plt.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
+
         #stats
-        mode = np.average(temp_boundary)
+        mean = np.average(temp_boundary)
         std = np.std(temp_boundary)
         percentile = np.percentile(temp_boundary,85)
-        print "mode: ", mode, " std: ", std, " 85percentile: ", percentile
+        print "mean: ", mean, " std: ", std, " 85percentile: ", percentile
+        x = np.linspace(50,170,150)
+        plt.plot(x,mlab.normpdf(x,mean,std), color='blue')
         plt.show()
 
 
