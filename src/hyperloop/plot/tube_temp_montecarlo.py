@@ -33,7 +33,7 @@ class HyperloopMonteCarlo(Assembly):
         #driver.add_response('hyperloop.radius_tube_outer')
 
         N_SAMPLES = 10000
-        driver.case_inputs.hyperloop.temp_outside_ambient = np.random.normal(305,7,N_SAMPLES)        
+        driver.case_inputs.hyperloop.temp_outside_ambient = np.random.normal(305,6,N_SAMPLES)        
         driver.case_inputs.hyperloop.solar_insolation = np.random.triangular(200,1000,1000,N_SAMPLES); #left, mode, right, samples
         driver.case_inputs.hyperloop.c_solar = np.random.triangular(0.5,0.7,1,N_SAMPLES);
         driver.case_inputs.hyperloop.surface_reflectance = np.random.triangular(0.4,0.5,0.9,N_SAMPLES);
@@ -43,7 +43,7 @@ class HyperloopMonteCarlo(Assembly):
         driver.case_inputs.hyperloop.compressor_adiabatic_eff = np.random.triangular(0.6,0.69,0.8,N_SAMPLES);
 
         self.timestamp = time.strftime("%Y%m%d%H%M%S")
-        self.recorders = [BSONCaseRecorder('output/therm_mc_%s.bson'%self.timestamp)]
+        self.recorders = [BSONCaseRecorder('../output/therm_mc_%s.bson'%self.timestamp)]
 
 class MiniHyperloop(Assembly): 
     """ Abriged Hyperloop Model """ 
@@ -91,7 +91,7 @@ class TubeWallTemp2(Component):
     pod_heat = Float(356149., units='W', iotype='out', desc='Heating due to a single capsule')
     #--Inputs--
     #Hyperloop Parameters/Design Variables
-    radius_outer_tube = Float(1.08823, units = 'm', iotype='in', desc='tube outer diameter') #7.3ft 1.115
+    radius_outer_tube = Float(2, units = 'm', iotype='in', desc='tube outer diameter') #7.3ft 1.115
     length_tube = Float(482803, units = 'm', iotype='in', desc='Length of entire Hyperloop') #300 miles, 1584000ft
     num_pods = Float(34, iotype='in', desc='Number of Pods in the Tube at a given time') #
     temp_boundary = Float(322.0, units = 'K', iotype='in', desc='Average Temperature of the tube wall') #
@@ -225,7 +225,10 @@ class TubeWallTemp2(Component):
         
         self.ss_temp_residual = (self.q_total_out - self.q_total_in)/1e6
 
-if __name__ == "__main__": 
+if __name__ == '__main__' and __package__ is None:
+    from os import sys, path #hack to import MC_Plot from sibling directory
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+    from plot.mc_histo import MC_Plot as mcp
 
     hl_mc = HyperloopMonteCarlo()
 
@@ -234,22 +237,5 @@ if __name__ == "__main__":
 
     #plot
     if (True):
-        cds = CaseDataset('output/therm_mc_%s.bson'%hl_mc.timestamp, 'bson')
-        data = cds.data.driver('driver').by_variable().fetch()
-        #temp
-        temp_boundary_k = data['hyperloop.temp_boundary']
-        temp_boundary = [((x-273.15)*1.8 + 32) for x in temp_boundary_k]
-        #histogram
-        n, bins, patches = plt.hist(temp_boundary, 50, normed=1, histtype='stepfilled')
-        plt.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
-
-        #stats
-        mean = np.average(temp_boundary)
-        std = np.std(temp_boundary)
-        percentile = np.percentile(temp_boundary,85)
-        print "mean: ", mean, " std: ", std, " 85percentile: ", percentile
-        x = np.linspace(50,170,150)
-        plt.plot(x,mlab.normpdf(x,mean,std), color='blue')
-        plt.show()
-
-
+        histo = mcp()
+        histo.plot('../output/therm_mc_%s.bson'%hl_mc.timestamp)
