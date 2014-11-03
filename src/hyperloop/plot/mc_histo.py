@@ -3,7 +3,7 @@ from matplotlib import pylab as plt
 from openmdao.lib.casehandlers.api import CaseDataset
 from matplotlib import mlab as mlab
 
-cds = CaseDataset('therm_mc_20141030140747.bson', 'bson')
+cds = CaseDataset('../output/therm_mc_20141030140747.bson', 'bson')
 data = cds.data.driver('driver').by_variable().fetch()
 #temp
 temp_boundary_k = data['hyperloop.temp_boundary']

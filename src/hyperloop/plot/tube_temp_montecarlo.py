@@ -43,7 +43,7 @@ class HyperloopMonteCarlo(Assembly):
         driver.case_inputs.hyperloop.compressor_adiabatic_eff = np.random.triangular(0.6,0.69,0.8,N_SAMPLES);
 
         self.timestamp = time.strftime("%Y%m%d%H%M%S")
-        self.recorders = [BSONCaseRecorder('therm_mc_%s.bson'%self.timestamp)]
+        self.recorders = [BSONCaseRecorder('output/therm_mc_%s.bson'%self.timestamp)]
 
 class MiniHyperloop(Assembly): 
     """ Abriged Hyperloop Model """ 
@@ -152,7 +152,7 @@ class TubeWallTemp2(Component):
 
         if (self.exit_Tt<0):
             self.failures +=1
-            print self.temp_boundary, "failures: ", self.failures
+            print self.temp_boundary, "invalid cases: ", self.failures
         elif(self.exit_Tt<400):
             self.cp_air = 990.8*self.exit_Tt**(0.00316)
         else:
@@ -234,7 +234,7 @@ if __name__ == "__main__":
 
     #plot
     if (True):
-        cds = CaseDataset('therm_mc_%s.bson'%hl_mc.timestamp, 'bson')
+        cds = CaseDataset('output/therm_mc_%s.bson'%hl_mc.timestamp, 'bson')
         data = cds.data.driver('driver').by_variable().fetch()
         #temp
         temp_boundary_k = data['hyperloop.temp_boundary']
