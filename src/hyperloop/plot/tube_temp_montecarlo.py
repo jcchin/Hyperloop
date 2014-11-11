@@ -2,14 +2,55 @@ import os
 import time
 
 import numpy as np
-from math import log, pi, sqrt, e
+from scipy.interpolate import interp1d
+
+from math import log, pi, sqrt, e, isnan
 from matplotlib import pylab as plt
 from matplotlib import mlab as mlab
 
 from openmdao.main.api import Assembly, Component
 from openmdao.lib.datatypes.api import Float, Bool, Str
-from openmdao.lib.drivers.api import CaseIteratorDriver, BroydenSolver
+from openmdao.lib.drivers.api import CaseIteratorDriver, BroydenSolver, NewtonSolver
 from openmdao.lib.casehandlers.api import BSONCaseRecorder, CaseDataset
+
+
+#Cengal Y., Turner R., and Cimbala J., Fundamentals of
+#  Thermal-Fluid Sciences, McGraw-Hill Companies, 2008.
+#Table A-22 pg 1020
+temp_lookup = np.array([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, \
+                       60, 70, 80, 90, 100, 120, 140, 160, 180, \
+                        200, 250, 300])
+
+k_lookup = np.array([0.02364, .02401, .02439, .02476, .02514, \
+                     .02551, .02588, .02625, .02662, .02699, .02735, \
+                       .02808, .02881, .02953, .03024, .03095, .03235, \
+                        .03374, .03511, .03646, .03779, .04104, .04418])
+
+k_interp = interp1d(temp_lookup, k_lookup, fill_value=.02, bounds_error=False)
+
+nu_lookup = np.array([1.338, 1.382, 1.426, 1.470, 1.516, 1.562, 1.608,\
+                         1.655, 1.702, 1.75, 1.798, 1.896, 1.995, 2.097, \
+                          2.201, 2.306, 2.522, 2.745, 2.975, 3.212,\
+                          3.455, 4.091, 4.765])*(10**(-5))
+
+nu_interp = interp1d(nu_lookup, k_lookup, fill_value=1.3e-5, bounds_error=False)
+
+alpha_lookup = np.array([1.818, 1.880, 1.944, 2.009, 2.074, 2.141, 2.208,\
+                         2.277, 2.346, 2.416, 2.487, 2.632, 2.78, 2.931,\
+                         3.086, 3.243, 3.565, 3.898, 4.241, 4.592, \
+                         4.954, 5.89, 6.871])*(10**(-5))
+
+alpha_interp = interp1d(alpha_lookup, k_lookup, fill_value=1.8e-5, bounds_error=False)
+
+
+pr_lookup = np.array([.7362, .7350, .7336, .7323, .7309, .7296, .7282, \
+                      .7268, .7255, .7241, .7228, .7202, .7177, .7154, \
+                      .7132, .7111, .7073, .7041, .7014, .6992, \
+                      .6974, .6946, .6935])
+
+pr_interp = interp1d(pr_lookup, k_lookup, fill_value=.74, bounds_error=False)
+
+
 
 class HyperloopMonteCarlo(Assembly):
 
@@ -53,8 +94,8 @@ class MiniHyperloop(Assembly):
     def configure(self): 
         #Add Components
         self.add('tubeTemp', TubeWallTemp2())
-        driver = self.add('driver',BroydenSolver())
-        driver.add_parameter('tubeTemp.temp_boundary',low=0.,high=10000.)
+        driver = self.add('driver',NewtonSolver())
+        driver.add_parameter('tubeTemp.temp_boundary',low=0.,high=500.)
         driver.add_constraint('tubeTemp.ss_temp_residual=0')
         driver.workflow.add(['tubeTemp'])
 
@@ -120,6 +161,9 @@ class TubeWallTemp2(Component):
     Nu = Float(232.4543713, iotype='out', desc='Nusselt #') #
     k = Float(0.02655, units = 'W/(m*K)', iotype='out', desc='Thermal conductivity') #
     h = Float(0.845464094, units = 'W/((m**2)*K)', iotype='out', desc='Heat Radiated to the outside') #
+    alpha = Float(2.487*(10**(-5)), units = '(m**2)/s', iotype='out', desc='Thermal diffusivity') #
+    k_visc = Float(1.798*(10**(-5)), units = '(m**2)/s', iotype='out', desc='Kinematic viscosity') #
+    film_temp = Float(310, units = 'K', iotype='out', desc='Film temperature') #
     area_convection = Float(3374876.115, units = 'W', iotype='out', desc='Convection Area') #
     #Natural Convection
     q_per_area_nat_conv = Float(7.9, units = 'W/(m**2)', iotype='out', desc='Heat Radiated per Area to the outside') #
@@ -149,10 +193,9 @@ class TubeWallTemp2(Component):
         self.exit_Tt = self.inlet_Tt*(1 + (1/self.compressor_adiabatic_eff)*(self.compPR**(1/3.5)-1) )
         self.exit_Pt = self.inlet_Pt * self.compPR
 
-
         if (self.exit_Tt<0):
             self.failures +=1
-            print self.temp_boundary, "invalid cases: ", self.failures
+            #print self.temp_boundary, "invalid cases: ", self.failures
         elif(self.exit_Tt<400):
             self.cp_air = 990.8*self.exit_Tt**(0.00316)
         else:
@@ -168,36 +211,81 @@ class TubeWallTemp2(Component):
         #Total Q = Q * (number of pods)
         self.total_heat_rate_pods = self.heat_rate_pod*self.num_pods
 
-        #Determine thermal resistance of outside via Natural Convection or forced convection
-        if(self.temp_outside_ambient < 400):
-            self.GrDelTL3 = 41780000000000000000*((self.temp_outside_ambient)**(-4.639)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
-        else:
-            self.GrDelTL3 = 4985000000000000000*((self.temp_outside_ambient)**(-4.284)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
+        ## Berton Method
+        # #Determine thermal resistance of outside via Natural Convection or forced convection
+        # if(self.temp_outside_ambient < 400):
+        #     self.GrDelTL3 = 41780000000000000000*((self.temp_outside_ambient)**(-4.639)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
+        # else:
+        #     self.GrDelTL3 = 4985000000000000000*((self.temp_outside_ambient)**(-4.284)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
         
-        #Prandtl Number
-        #Pr = viscous diffusion rate/ thermal diffusion rate = Cp * dyanamic viscosity / thermal conductivity
-        #Pr << 1 means thermal diffusivity dominates
-        #Pr >> 1 means momentum diffusivity dominates
-        if (self.temp_outside_ambient < 400):
-            self.Pr = 1.23*(self.temp_outside_ambient**(-0.09685)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
-        else:
-            self.Pr = 0.59*(self.temp_outside_ambient**(0.0239))
-        #Grashof Number
-        #Relationship between buoyancy and viscosity
-        #Laminar = Gr < 10^8
-        #Turbulent = Gr > 10^9
-        self.Gr = self.GrDelTL3*abs(self.temp_boundary-self.temp_outside_ambient)*(self.diameter_outer_tube**3) #JSG: Added abs incase subtraction goes negative
-        #Rayleigh Number 
-        #Buoyancy driven flow (natural convection)
-        self.Ra = self.Pr * self.Gr
+        # #Prandtl Number
+        # #Pr = viscous diffusion rate/ thermal diffusion rate = Cp * dyanamic viscosity / thermal conductivity
+        # #Pr << 1 means thermal diffusivity dominates
+        # #Pr >> 1 means momentum diffusivity dominates
+        # if (self.temp_outside_ambient < 400):
+        #     self.Pr = 1.23*(self.temp_outside_ambient**(-0.09685)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
+        # else:
+        #     self.Pr = 0.59*(self.temp_outside_ambient**(0.0239))
+        # #Grashof Number
+        # #Relationship between buoyancy and viscosity
+        # #Laminar = Gr < 10^8
+        # #Turbulent = Gr > 10^9
+        # self.Gr = self.GrDelTL3*abs(self.temp_boundary-self.temp_outside_ambient)*(self.diameter_outer_tube**3) #JSG: Added abs incase subtraction goes negative
+        # #Rayleigh Number 
+        # #Buoyancy driven flow (natural convection)
+        # self.Ra = self.Pr * self.Gr
+
+        ## Film Temp method
+        #(interp tables in Celsius)
+        self.film_temp = (self.temp_outside_ambient + self.temp_boundary)/2.
+
+        #print "a", self.temp_outside_ambient
+        #print "b", self.temp_boundary
+        #print self.film_temp
+        #self.k = np.interp(self.film_temp-273.15, temp_lookup, k_lookup)
+        #print "film temp: ", self.film_temp-273.15
+        self.k = float(k_interp(self.film_temp-273.15))
+        # self.k = np.where(self.film_temp < temp_lookup[0], k_lookup[0] + (self.film_temp-temp_lookup[0]) * (k_lookup[0]-k_lookup[1]) / (temp_lookup[0]-temp_lookup[1]),self.k)
+        # self.k = np.where(self.film_temp > temp_lookup[-1], k_lookup[-1] + (self.film_temp-temp_lookup[-1])*(k_lookup[-1]-k_lookup[-2])/(temp_lookup[-1]-temp_lookup[-2]),self.k)
+
+        #self.k_visc = float(np.interp(self.film_temp-273.15, temp_lookup, nu_lookup))
+        self.k_visc = float(nu_interp(self.film_temp-273.15))
+        # self.k_visc = np.where(self.film_temp < temp_lookup[0], nu_lookup[0] + (self.film_temp-temp_lookup[0]) * (nu_lookup[0]-nu_lookup[1]) / (temp_lookup[0]-temp_lookup[1]),self.k_visc)
+        # self.k_visc = np.where(self.film_temp > temp_lookup[-1], nu_lookup[-1] + (self.film_temp-temp_lookup[-1])*(nu_lookup[-1]-nu_lookup[-2])/(temp_lookup[-1]-temp_lookup[-2]),self.k_visc)
+
+
+        #self.alpha = float(np.interp(self.film_temp-273.15, temp_lookup, alpha_lookup))
+        self.alpha = float(alpha_interp(self.film_temp-273.15))
+        # self.alpha = np.where(self.film_temp < temp_lookup[0], alpha_lookup[0] + (self.film_temp-temp_lookup[0]) * (alpha_lookup[0]-alpha_lookup[1]) / (temp_lookup[0]-temp_lookup[1]),self.alpha)
+        # self.alpha = np.where(self.film_temp > temp_lookup[-1], alpha_lookup[-1] + (self.film_temp-temp_lookup[-1])*(alpha_lookup[-1]-alpha_lookup[-2])/(temp_lookup[-1]-temp_lookup[-2]),self.alpha)
+
+        # self.Pr = np.interp(self.film_temp-273.15, temp_lookup, pr_lookup)
+        self.Pr = float(pr_interp(self.film_temp-273.15))
+
+        self.Ra = (9.81*(1/self.film_temp)* \
+                    np.abs(self.temp_boundary - self.temp_outside_ambient) * \
+                    (self.diameter_outer_tube**3) * self.Pr) / (self.k_visc**2)
+
+        # "temp_boundary: ", self.temp_boundary, self.temp_outside_ambient
         #Nusselt Number
         #Nu = convecive heat transfer / conductive heat transfer
         if (self.Ra<=10**12): #valid in specific flow regime
             self.Nu = self.Nu_multiplier*((0.6 + 0.387*self.Ra**(1./6.)/(1 + (0.559/self.Pr)**(9./16.))**(8./27.))**2) #3rd Ed. of Introduction to Heat Transfer by Incropera and DeWitt, equations (9.33) and (9.34) on page 465
-        if(self.temp_outside_ambient < 400):
-            self.k = 0.0001423*(self.temp_outside_ambient**(0.9138)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
-        else:
-            self.k = 0.0002494*(self.temp_outside_ambient**(0.8152))
+        else: 
+            self.Nu = 232.4543713
+
+        # print self.temp_boundary
+        # if isnan(self.Ra): 
+        #     print self.film_temp
+        #     print self.Ra, self.Pr
+        #     exit()
+        # print 
+
+        # if(self.temp_outside_ambient < 400):
+        #     self.k = 0.0001423*(self.temp_outside_ambient**(0.9138)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
+        # else:
+        #     self.k = 0.0002494*(self.temp_outside_ambient**(0.8152))
+
         #h = k*Nu/Characteristic Length
         self.h = (self.k * self.Nu)/ self.diameter_outer_tube
         #Convection Area = Surface Area

@@ -24,9 +24,10 @@ class MC_Plot:
         plt.xlim([60,160])
         plt.ylabel('Probability', fontsize=18)
         plt.xlabel(u'Equilibrium Temperature, \N{DEGREE SIGN}F', fontsize=18)
-        plt.show()
-
+        #plt.show()
+        plt.tight_layout()
+        plt.savefig('../output/histo.pdf', dpi=300)
 if __name__ == "__main__": 
 
     p = MC_Plot()
-    p.plot('../output/therm_mc_20141102234350.bson')
+    p.plot('../output/therm_mc_20141110173851.bson')
