@@ -220,7 +220,7 @@ $M_{pod}$ and $M_{bypass}$ that defines an area ratio, $\frac{A_{bypass}}{A_{tub
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=.9\textwidth]{images/areaPlot.png}
+  \includegraphics[width=.9\textwidth]{images/areaPlot.pdf}
   \caption{The required area ratio reaches a minimum value at $M_{bypass}=1$ for all values of $M_{pod}$, given the closed pod configuration illustrated in Figure 5.}
   \label{f:choked-flow}
 \end{figure}
@@ -349,7 +349,7 @@ results in an overall battery storage requirement.
 
 \begin{figure}[hbtp]
 \centering
-\includegraphics[width=0.9\textwidth]{images/battery_plot2.png}
+\includegraphics[width=0.9\textwidth]{images/battery_plot.pdf}
 \caption[Battery/Compressor/Mission requirements as a function of pod speed]
 {Battery requirements, compressor power, and mission time as a function of pod speed.}
 \label{f:battery}
@@ -629,15 +629,17 @@ around the model’s nominal values as listed in Table \ref{tab:montecarlo}.
 
 A histogram and a normal distribution of tube temperature
 based on 10,000 samples are shown in Fig. \ref{f:montecarlo}.
-The mean tube temperature is 105 \degree F with a standard deviation of 10 \degree F.
-Exceeding 130 \degree F is estimated to occur only 0.5 percent of the time.
+The mean tube temperature is 108 \degree F with a standard deviation of 12.2 \degree F.
+Exceeding 138 \degree F is estimated to occur only 0.5\% of the time.
 Based on this assessment,
 an ordinary air conditioning system may be sufficient to control cabin heating.
 
 \begin{figure}[hbtp]
 \centering
-\includegraphics[width=.75\textwidth]{images/histo.pdf}
- \caption[MonteCarlo]{Monte Carlo uncertainty analysis of equilibrium tube temperature. Histograms and nomral distribution generated from 10,000 sampls using a bin span of 1 \degre F.}
+\includegraphics[width=.9\textwidth]{images/histo.pdf}
+ \caption[MonteCarlo]{Monte Carlo uncertainty analysis of the equilibrium tube temperature.
+ Histograms and normal distribution generated from 15,000 samples
+ using a bin span of 1\degree F.}
 \label{f:montecarlo}
 \end{figure}
 

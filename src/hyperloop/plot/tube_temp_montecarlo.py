@@ -25,21 +25,18 @@ k_lookup = np.array([0.02364, .02401, .02439, .02476, .02514, \
                      .02551, .02588, .02625, .02662, .02699, .02735, \
                        .02808, .02881, .02953, .03024, .03095, .03235, \
                         .03374, .03511, .03646, .03779, .04104, .04418])
-
 k_interp = interp1d(temp_lookup, k_lookup, fill_value=.02, bounds_error=False)
 
 nu_lookup = np.array([1.338, 1.382, 1.426, 1.470, 1.516, 1.562, 1.608,\
                          1.655, 1.702, 1.75, 1.798, 1.896, 1.995, 2.097, \
                           2.201, 2.306, 2.522, 2.745, 2.975, 3.212,\
                           3.455, 4.091, 4.765])*(10**(-5))
-
 nu_interp = interp1d(nu_lookup, k_lookup, fill_value=1.3e-5, bounds_error=False)
 
 alpha_lookup = np.array([1.818, 1.880, 1.944, 2.009, 2.074, 2.141, 2.208,\
                          2.277, 2.346, 2.416, 2.487, 2.632, 2.78, 2.931,\
                          3.086, 3.243, 3.565, 3.898, 4.241, 4.592, \
                          4.954, 5.89, 6.871])*(10**(-5))
-
 alpha_interp = interp1d(alpha_lookup, k_lookup, fill_value=1.8e-5, bounds_error=False)
 
 
@@ -47,7 +44,6 @@ pr_lookup = np.array([.7362, .7350, .7336, .7323, .7309, .7296, .7282, \
                       .7268, .7255, .7241, .7228, .7202, .7177, .7154, \
                       .7132, .7111, .7073, .7041, .7014, .6992, \
                       .6974, .6946, .6935])
-
 pr_interp = interp1d(pr_lookup, k_lookup, fill_value=.74, bounds_error=False)
 
 
@@ -73,7 +69,7 @@ class HyperloopMonteCarlo(Assembly):
         driver.add_response('hyperloop.temp_boundary')
         #driver.add_response('hyperloop.radius_tube_outer')
 
-        N_SAMPLES = 10000
+        N_SAMPLES = 5000
         driver.case_inputs.hyperloop.temp_outside_ambient = np.random.normal(305,6,N_SAMPLES)        
         driver.case_inputs.hyperloop.solar_insolation = np.random.triangular(200,1000,1000,N_SAMPLES); #left, mode, right, samples
         driver.case_inputs.hyperloop.c_solar = np.random.triangular(0.5,0.7,1,N_SAMPLES);
@@ -239,47 +235,21 @@ class TubeWallTemp2(Component):
         #(interp tables in Celsius)
         self.film_temp = (self.temp_outside_ambient + self.temp_boundary)/2.
 
-        #print "a", self.temp_outside_ambient
-        #print "b", self.temp_boundary
-        #print self.film_temp
-        #self.k = np.interp(self.film_temp-273.15, temp_lookup, k_lookup)
-        #print "film temp: ", self.film_temp-273.15
         self.k = float(k_interp(self.film_temp-273.15))
-        # self.k = np.where(self.film_temp < temp_lookup[0], k_lookup[0] + (self.film_temp-temp_lookup[0]) * (k_lookup[0]-k_lookup[1]) / (temp_lookup[0]-temp_lookup[1]),self.k)
-        # self.k = np.where(self.film_temp > temp_lookup[-1], k_lookup[-1] + (self.film_temp-temp_lookup[-1])*(k_lookup[-1]-k_lookup[-2])/(temp_lookup[-1]-temp_lookup[-2]),self.k)
-
-        #self.k_visc = float(np.interp(self.film_temp-273.15, temp_lookup, nu_lookup))
         self.k_visc = float(nu_interp(self.film_temp-273.15))
-        # self.k_visc = np.where(self.film_temp < temp_lookup[0], nu_lookup[0] + (self.film_temp-temp_lookup[0]) * (nu_lookup[0]-nu_lookup[1]) / (temp_lookup[0]-temp_lookup[1]),self.k_visc)
-        # self.k_visc = np.where(self.film_temp > temp_lookup[-1], nu_lookup[-1] + (self.film_temp-temp_lookup[-1])*(nu_lookup[-1]-nu_lookup[-2])/(temp_lookup[-1]-temp_lookup[-2]),self.k_visc)
-
-
-        #self.alpha = float(np.interp(self.film_temp-273.15, temp_lookup, alpha_lookup))
         self.alpha = float(alpha_interp(self.film_temp-273.15))
-        # self.alpha = np.where(self.film_temp < temp_lookup[0], alpha_lookup[0] + (self.film_temp-temp_lookup[0]) * (alpha_lookup[0]-alpha_lookup[1]) / (temp_lookup[0]-temp_lookup[1]),self.alpha)
-        # self.alpha = np.where(self.film_temp > temp_lookup[-1], alpha_lookup[-1] + (self.film_temp-temp_lookup[-1])*(alpha_lookup[-1]-alpha_lookup[-2])/(temp_lookup[-1]-temp_lookup[-2]),self.alpha)
-
-        # self.Pr = np.interp(self.film_temp-273.15, temp_lookup, pr_lookup)
         self.Pr = float(pr_interp(self.film_temp-273.15))
 
         self.Ra = (9.81*(1/self.film_temp)* \
                     np.abs(self.temp_boundary - self.temp_outside_ambient) * \
                     (self.diameter_outer_tube**3) * self.Pr) / (self.k_visc**2)
 
-        # "temp_boundary: ", self.temp_boundary, self.temp_outside_ambient
         #Nusselt Number
         #Nu = convecive heat transfer / conductive heat transfer
         if (self.Ra<=10**12): #valid in specific flow regime
             self.Nu = self.Nu_multiplier*((0.6 + 0.387*self.Ra**(1./6.)/(1 + (0.559/self.Pr)**(9./16.))**(8./27.))**2) #3rd Ed. of Introduction to Heat Transfer by Incropera and DeWitt, equations (9.33) and (9.34) on page 465
         else: 
             self.Nu = 232.4543713
-
-        # print self.temp_boundary
-        # if isnan(self.Ra): 
-        #     print self.film_temp
-        #     print self.Ra, self.Pr
-        #     exit()
-        # print 
 
         # if(self.temp_outside_ambient < 400):
         #     self.k = 0.0001423*(self.temp_outside_ambient**(0.9138)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)

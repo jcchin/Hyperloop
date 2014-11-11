@@ -1,6 +1,6 @@
 #
 # =============================================================================
-#  PYTHON SCRIPT FOR PLOTTING SMITH CHART
+#  PYTHON SCRIPT FOR PLOTTING AREA RATIO v MN CHART
 #  creates figure 6
 # =============================================================================
 
@@ -52,6 +52,8 @@ pylab.vlines(1.0, 0, 1.0, colors='darkgrey', linestyles='dashed',lw= 3)#, label=
 
 pylab.gcf().set_size_inches(11,8)
 
-pylab.show()
+#pylab.show()
+pylab.tight_layout()
+pylab.savefig('../output/areaPlot.pdf', dpi=300)
 
 

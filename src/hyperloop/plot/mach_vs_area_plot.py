@@ -31,4 +31,6 @@ p.legend(loc="best")
     
 p.gcf().set_size_inches(11,5.5)
 #p.gcf().savefig('test2png.png',dpi=130)
-p.show()
+#p.show()
+p.tight_layout()
+p.savefig('../output/mach_vs_rad.pdf', dpi=300)
