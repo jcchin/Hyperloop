@@ -512,7 +512,7 @@ and $C_{p,air}$ is the specific heat of air given by the relations in Ref. \cite
 
 The entire 300 mile length of the tube is assumed to be unshaded and exposed to sunlight.
 Only direct solar irradiance (G) is considered.
-At noon on a clear day at ground level, G may be as great as 1000W/m2,
+At noon on a clear day at ground level, G may be as great as 1000 $\frac{W}{m^{2}}$,
 although it may be substantially attenuated on cloudy days.
 The heating rate due to solar irradiation is estimated by
 
@@ -612,13 +612,13 @@ around the model’s nominal values as listed in Table \ref{tab:montecarlo}.
     \begin{tabulary}{1.0\textwidth}{l  c  c  c c c} 
         \hline
         Variable & Mode & Model & Min & Max & Std. Dev\\ \hline \hline
-        $T_{amb}$ & 90 \degree F & Normal & - & - & 8 \\ 
+        $T_{amb}$ & 305 \degree K & Normal & - & - & 6 \\ 
         $G$ & $1000\frac{W}{m^2}$ & Triangular & $200\frac{W}{m^2}$ & $1000\frac{W}{m^2}$ & - \\
         $\rho$ & 0.5 & Triangular & 0.4 & 0.9 & - \\
         $\epsilon$ & 0.5 & Triangular & 0.4 & 0.9 & - \\
         $\eta_{c}$ & 0.69 & Triangular & 0.6 & 0.8 & - \\
         $n$ & 34 & Triangular & - & - & 2 \\
-        $D_{o,tube}$ & 7.3ft & Normal & 7.0ft & 7.6ft & - \\
+        %$D_{o,tube}$ & 7.3ft & Normal & 7.0ft & 7.6ft & - \\
         $c_{solar}$ & 0.7 & Triangular & 0.5 & 1.0 & - \\
         $c_{conv}$ & 1.0 & Triangular & 0.9 & 3.0 & - \\
         \hline
@@ -627,12 +627,15 @@ around the model’s nominal values as listed in Table \ref{tab:montecarlo}.
 \end{table}
 
 
-A histogram and a normal distribution of tube temperature
-based on 10,000 samples are shown in Fig. \ref{f:montecarlo}.
+A histogram and a fitted normal distribution of tube temperature
+based on 15,000 samples are shown in Fig. \ref{f:montecarlo}.
 The mean tube temperature is 108 \degree F with a standard deviation of 12.2 \degree F.
-Exceeding 138 \degree F is estimated to occur only 0.5\% of the time.
-Based on this assessment,
-an ordinary air conditioning system may be sufficient to control cabin heating.
+Exceeding 138 \degree F only occurs in 5\% of the possibile scenarios generated.
+This Monte Carlo assumes a fixed tube diameter of 4 meters,
+for reasons outlined in Section \ref{s:sizing}.
+Repeating the experiment closer to the original 2 meter diameter results in
+a distribution with approximately the same mean and a lower standard deviation
+of 9.7 \degree F.
 
 \begin{figure}[hbtp]
 \centering
@@ -644,22 +647,15 @@ an ordinary air conditioning system may be sufficient to control cabin heating.
 \end{figure}
 
 
-The steady state tube temperature can be found by varying the tube temperature until the
-rate of heat being released from the tube matches the rate of heat being absorbed by the tube.
-Additionally, relatively small amounts of wind could provide
-considerable further cooling improvements through forced convection.
-Assuming the tube is left uncovered, the heat transferred from solar radiation alone would be an order of
-magnitude larger than the heat rate added from pod compression systems.
-These results suggest that there is no need for on-board cooling, since the marginal temperature
-rises would result in higher convection and radiation rates, quickly bringing the system back to steady-state.
-Assuming a 90 \degree F day in addition to other nominal values for typical heat transfer variables,
-radiation and convection out of the tube would lead to a manageable steady-state tube wall temperature of 120 \degree F.
-This sub-iteration then feeds back into the overall hyperloop convergence loop, both affected by
-and contributing to the compression cycle, creating feedback “C” in Fig. \ref{f:hyperloopXDSM}.
-The analysis suggests that the dominant heating factors are a direct result of the massive tube structure,
-with relatively low coupling with the pod design.
-The thermal management should therefore be incorporated into the tube design, rather than integrated into the volume and weight constrained pod design.
-Considerations for solar panel sheilding, as outlined in the original proposal, would produce even more optimistic results.
+The sub-iteration of the thermal discipline then feeds back into the overall
+hyperloop convergence loop, both affected by and contributing to the
+compression cycle, creating feedback “C” in Fig. \ref{f:hyperloopXDSM}.
+The analysis suggests that the dominant heating factors are a direct result of
+the massive tube structure, with only 5 \% of the heat contributed from the pods.
+The thermal management should therefore be incorporated into the tube design,
+rather than integrated into the volume and weight constrained pod design.
+Considerations for solar panel sheilding, as outlined in the original proposal,
+would produce even more optimistic results thermally.
 
 
 \section{Conclusions}
@@ -669,14 +665,15 @@ to investigate the features and assertions of the original design.
 The refined analysis illuminates several
 interdisciplinary couplings that alter two major aspects of the initial concept.
 First, the pod travel speed and the tube cross sectional area are linked, forcing 
-the tube size to be to be roughly twice the diameter of the original specification, in order for the 
-pod to reach Mach 0.8. Second, the steady-state tube temperature is dominated by ambient thermal interactions
-unrelated to the heat generated by the pod compression system.
-As a result, the two heat exchangers originally prescribed for thermal management are eliminated.
+the tube size to be to be roughly twice the diameter of the original specification,
+in order for the pod to reach Mach 0.8.
+Second, the steady-state tube temperature is dominated by ambient thermal interactions
+unrelated to the heat generated by the pod compression system. As a result,
+the two water-based heat exchangers originally prescribed for thermal management are eliminated.
 Although this work identifies some necessary refinements to the Hyperloop design, the core 
 concept remains potentially feasible and warrants continued investigation. 
 This work emphasizes the importance of maintaining a systems-level approach
-and provides tool-sets capable of manging the growing complexity.
+and provides toolsets capable of manging the growing complexity.
 The modeling platform is intended to serve as an easily accessible baseline that is straightforward to
 expand and delve deeper into this unique multidisciplinary endeavor.
 
