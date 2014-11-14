@@ -458,7 +458,7 @@ and the logarithmic mean temperature difference (${\Delta}T_{LM}$) of the heat e
 
 \subsubsection{Equilibrium Tube Temperature}
 
-The onboard water cooling and vapor collection system as proposed in Ref. 1
+The onboard water cooling and vapor collection system as proposed in Ref. \citen{Musk}
 appears infeasible for reasons described above.
 Nevertheless some form of pod cabin cooling would be desired. 
 If the tube temperature is not excessive,
@@ -482,7 +482,7 @@ if tube would ever reach detrimental temperatures and if a simple pod air condit
 
 If the heat of the rarified atmosphere inside the tube exchanges rapidly with the tube wall,
 then the total temperature of the air entering the compressor inlet
-may be related to the tube wall temperature (Ttube) and the pod Mach number (M):
+may be related to the total tube wall temperature ($T_{t,tube}$) and the pod Mach number ($M$):
 
 \nomenclature{P}{Pressure ($\frac{N}{m^{2}}$)}
 \nomenclature{PR}{Pressure Ratio}
@@ -508,11 +508,11 @@ The heating rate due to all of the pods operating in the tube may be estimated b
 
 where $n$ is the number of pods in transit,
 $\dot{m}$ is the airflow per compressor determined by the cycle analysis,
-and $C_{p,air}$ is the specific heat of air given by the relations in Ref. \cite{Clausing}. 
+and $C_{p,air}$ is the specific heat of air given by the relations in Ref. \citen{Clausing}. 
 
 The entire 300 mile length of the tube is assumed to be unshaded and exposed to sunlight.
-Only direct solar irradiance (G) is considered.
-At noon on a clear day at ground level, G may be as great as 1000 $\frac{W}{m^{2}}$,
+Only direct solar irradiance ($G$) is considered.
+At noon on a clear day at ground level, $G$ may be as great as 1000 $\frac{W}{m^{2}}$,
 although it may be substantially attenuated on cloudy days.
 The heating rate due to solar irradiation is estimated by
 
@@ -575,17 +575,19 @@ Nu = \Bigg(0.6 + \frac{0.387Ra^{\frac{1}{6}}}{[1+(\frac{0.559}{Pr})^{\frac{9}{16
 \end{equation}
 
 where $Ra$ is the Rayleigh number
-($\frac{g \beta T} {\upsilon\alpha}  (T_{tube}-T_{amb}) {D}_{o,tube}^3$)
+($\frac{g \beta} {\upsilon\alpha}  [T_{tube}-T_{amb}] {D}_{o,tube}^3$)
 and Pr is the Prandtl number ($\frac{\nu}{\alpha}$).
 The correlation is applicable for estimating free convection from long,
 horizontal cylinders. Properties for air ($h$, $k$, $\beta$, $\nu$ and $\alpha$)
 are based on the film temperature of the thermal boundary layer
-and are given by the regressions in Ref. \cite{Clausing}.
+and are given by the regressions in Ref. \citen{Clausing}.
 With the heat transfer coefficient $h$ known from the Nusselt number,
 the heat lost to free convection ($Q_{conv}$) may be estimated from the total tube surface area.
 
 \begin{equation}
-Q_{nat. conv} = hA \Delta T = \frac{k\cdot Nu}{ {D}_{o,tube}} \pi {L}_{tube} {D}_{o,tube} (T_{tube}-T_{amb})
+Q_{nat. conv} = \underbrace{ \frac{k\cdot Nu}{ {D}_{o,tube}} }_\text{$h$}
+ \underbrace{ \pi {L}_{tube} {D}_{o,tube} }_\text{Area} 
+ \underbrace{ (T_{tube}-T_{amb})  }_\text{$\Delta T$} 
 \end{equation}
 
 
@@ -651,11 +653,11 @@ The sub-iteration of the thermal discipline then feeds back into the overall
 hyperloop convergence loop, both affected by and contributing to the
 compression cycle, creating feedback “C” in Fig. \ref{f:hyperloopXDSM}.
 The analysis suggests that the dominant heating factors are a direct result of
-the massive tube structure, with only 5 \% of the heat contributed from the pods.
+the massive tube structure, with only 5\% of the heat contributed from the pods.
 The thermal management should therefore be incorporated into the tube design,
 rather than integrated into the volume and weight constrained pod design.
-Considerations for solar panel sheilding, as outlined in the original proposal,
-would produce even more optimistic results thermally.
+Considerations for solar panel sheilding as outlined in the original proposal
+would produce even more thermally optimistic results.
 
 
 \section{Conclusions}
