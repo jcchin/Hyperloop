@@ -160,7 +160,7 @@ class TubeWallTemp2(Component):
     alpha = Float(2.487*(10**(-5)), units = '(m**2)/s', iotype='out', desc='Thermal diffusivity') #
     k_visc = Float(1.798*(10**(-5)), units = '(m**2)/s', iotype='out', desc='Kinematic viscosity') #
     film_temp = Float(310, units = 'K', iotype='out', desc='Film temperature') #
-    area_convection = Float(3374876.115, units = 'W', iotype='out', desc='Convection Area') #
+    area_convection = Float(3374876.115, units = 'm**2', iotype='out', desc='Convection Area') #
     #Natural Convection
     q_per_area_nat_conv = Float(7.9, units = 'W/(m**2)', iotype='out', desc='Heat Radiated per Area to the outside') #
     total_q_nat_conv = Float(286900419., units = 'W', iotype='out', desc='Total Heat Radiated to the outside via Natural Convection') #
