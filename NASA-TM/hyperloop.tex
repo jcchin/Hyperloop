@@ -613,7 +613,7 @@ around the model's nominal values as listed in Table \ref{tab:montecarlo}.
     \begin{tabulary}{1.0\textwidth}{l  c  c  c c c} 
         \hline
         Variable & Mode & Model & Min & Max & Std. Dev\\ \hline \hline
-        $T_{amb}$ & 305 K & Normal & - & - & 6 \\ 
+        $T_{amb}$ & 305 K & Normal & - & - & 4.5 K \\ 
         $G$ & $1000\frac{W}{m^{2}}$ & Triangular & $200\frac{W}{m^{2}}$ & $1000\frac{W}{m^{2}}$ & - \\
         $\rho$ & 0.5 & Triangular & 0.4 & 0.9 & - \\
         $\epsilon$ & 0.5 & Triangular & 0.4 & 0.9 & - \\
@@ -627,10 +627,10 @@ around the model's nominal values as listed in Table \ref{tab:montecarlo}.
 \end{table}
 
 
-A histogram and a fitted normal distribution of tube temperature
+A histogram and a normal distribution of tube temperature
 based on 15,000 samples are shown in Fig. \ref{f:montecarlo}.
 The mean tube temperature is 108 \degree F with a standard deviation of 11 \degree F.
-Exceeding 137 \degree F only occurs in 0.5\% of the possibile scenarios generated.
+Exceeding 137 \degree F only occurs in 0.5\% of the possible scenarios generated.
 This Monte Carlo assumes a fixed tube diameter of 4 meters,
 for reasons outlined in Section \ref{s:sizing}.
 Repeating the experiment closer to the original 2 meter diameter results in
@@ -654,7 +654,7 @@ The analysis suggests that the dominant heating factors are a direct result of
 the massive tube structure, with only 5\% of the heat contributed from the pods.
 The thermal management should therefore be incorporated into the tube design,
 rather than integrated into the volume and weight constrained pod design.
-Considerations for solar panel sheilding as outlined in the original proposal
+Considerations for solar panel shielding as outlined in the original proposal
 would produce even more thermally optimistic results.
 
 
