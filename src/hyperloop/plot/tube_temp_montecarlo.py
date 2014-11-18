@@ -69,8 +69,8 @@ class HyperloopMonteCarlo(Assembly):
         driver.add_response('hyperloop.temp_boundary')
         #driver.add_response('hyperloop.radius_tube_outer')
 
-        N_SAMPLES = 5000
-        driver.case_inputs.hyperloop.temp_outside_ambient = np.random.normal(305,6,N_SAMPLES)        
+        N_SAMPLES = 15000
+        driver.case_inputs.hyperloop.temp_outside_ambient = np.random.normal(305,4.4,N_SAMPLES)        
         driver.case_inputs.hyperloop.solar_insolation = np.random.triangular(200,1000,1000,N_SAMPLES); #left, mode, right, samples
         driver.case_inputs.hyperloop.c_solar = np.random.triangular(0.5,0.7,1,N_SAMPLES);
         driver.case_inputs.hyperloop.surface_reflectance = np.random.triangular(0.4,0.5,0.9,N_SAMPLES);
