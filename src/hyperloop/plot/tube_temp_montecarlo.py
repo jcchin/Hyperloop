@@ -207,34 +207,35 @@ class TubeWallTemp2(Component):
         #Total Q = Q * (number of pods)
         self.total_heat_rate_pods = self.heat_rate_pod*self.num_pods
 
-        ## Berton Method
+        ## Film Temp method
+        #(interp tables in Celsius)
+        self.film_temp = (self.temp_outside_ambient + self.temp_boundary)/2.
+
+        # # Berton Method
         # #Determine thermal resistance of outside via Natural Convection or forced convection
-        # if(self.temp_outside_ambient < 400):
-        #     self.GrDelTL3 = 41780000000000000000*((self.temp_outside_ambient)**(-4.639)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
+        # if(self.film_temp < 400):
+        #     self.GrDelTL3 = 41780000000000000000*((self.film_temp)**(-4.639)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
         # else:
-        #     self.GrDelTL3 = 4985000000000000000*((self.temp_outside_ambient)**(-4.284)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
+        #     self.GrDelTL3 = 4985000000000000000*((self.film_temp)**(-4.284)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
         
         # #Prandtl Number
         # #Pr = viscous diffusion rate/ thermal diffusion rate = Cp * dyanamic viscosity / thermal conductivity
         # #Pr << 1 means thermal diffusivity dominates
         # #Pr >> 1 means momentum diffusivity dominates
-        # if (self.temp_outside_ambient < 400):
-        #     self.Pr = 1.23*(self.temp_outside_ambient**(-0.09685)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
+        # if (self.film_temp < 400):
+        #     self.Pr = 1.23*(self.film_temp**(-0.09685)) #SI units (https://mdao.grc.nasa.gov/publications/Berton-Thesis.pdf pg51)
         # else:
-        #     self.Pr = 0.59*(self.temp_outside_ambient**(0.0239))
+        #     self.Pr = 0.59*(self.film_temp**(0.0239))
         # #Grashof Number
         # #Relationship between buoyancy and viscosity
         # #Laminar = Gr < 10^8
         # #Turbulent = Gr > 10^9
-        # self.Gr = self.GrDelTL3*abs(self.temp_boundary-self.temp_outside_ambient)*(self.diameter_outer_tube**3) #JSG: Added abs incase subtraction goes negative
+        # self.Gr = self.GrDelTL3*abs(self.temp_boundary-self.film_temp)*(self.diameter_outer_tube**3) #JSG: Added abs incase subtraction goes negative
         # #Rayleigh Number 
         # #Buoyancy driven flow (natural convection)
         # self.Ra = self.Pr * self.Gr
 
-        ## Film Temp method
-        #(interp tables in Celsius)
-        self.film_temp = (self.temp_outside_ambient + self.temp_boundary)/2.
-
+    
         self.k = float(k_interp(self.film_temp-273.15))
         self.k_visc = float(nu_interp(self.film_temp-273.15))
         self.alpha = float(alpha_interp(self.film_temp-273.15))
