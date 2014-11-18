@@ -30,7 +30,7 @@ For these reasons, the modeling approach applied here is inspired heavily by met
 
 Musk's original Hyperloop proposal includes individual high-level analyses of many major subsystems such as the pod compression system,
 elevated support structure, and propulsion system. While this demonstrates the basic viability of the concept, it does not address
-significant interdisciplinary couplings inherent in the Hyperloop system. These couplings introduce certain constraints which limit the 
+significant interdisciplinary couplings inherent in the Hyperloop system. These couplings introduce certain constraints that limit the 
 degrees of freedom available in the design space. The major contribution of this work is to identify the key couplings that constrain the system
 and adapt aircraft sizing methods to construct a conceptual design process that accounts for them. The most significant 
 interdisciplinary coupling arises between the passenger pod size and travel tube size. Aerodynamic concerns make it impossible to vary 
@@ -46,7 +46,7 @@ is outside the scope of this work and is reserved for future investigation.
 The fully integrated system model is constructed using OpenMDAO, a Python-based framework for 
 the design and optimization of highly coupled systems\cite{GrayBenchmarking2013}. 
 This work focuses on the aerodynamics and thermodynamics of the passenger pod itself.
-As such, it ignores many additional key sub-systems which will also have a large impact on the final design.
+As such, it ignores many additional key sub-systems that will also have a large impact on the final design.
 A more realistic design optimization will require more detailed models of the investigated systems and additional analyses for economic and 
 structural models. Adding all of this will result in significant growth in complexity of the Hyperloop model. 
 OpenMDAO can provide the means to manage growing model complexity 
@@ -95,9 +95,9 @@ Feed-forward connections, or variables affecting successive subsystems,
 are visualized as the blue arrows in the upper-right side of the diagram.
 For example, the \textit{Compressor Cycle} passes data to the \textit{Mission Analysis},
 \textit{Pod Geometry}, and \textit{Tube Temperature} analyses.
-In the lower-left side of the diagram, red arrows represent feedback connections which establish cyclical coupling between different analyses.
+In the lower-left side of the diagram, red arrows represent feedback connections, which establish cyclical coupling between different analyses.
 %The top-left block of Fig. \ref{f:podXDSM} shows system-level design variables that affect numerous components. 
-Table \ref{tab:desvars} summarizes the baseline values from the original proposal which are used as design variables in this analysis.
+Table \ref{tab:desvars} summarizes the baseline values from the original proposal, which are used as design variables in this analysis.
 Notably, both pod radius and travel tube radius are omitted, since these variables cannot be freely varied.
 Instead, the assumption of a fixed area for a passenger compartment was made which,
 combined with the couplings shown in Fig. \ref{f:hyperloopXDSM}, removed these variables as design inputs.
@@ -110,9 +110,9 @@ This issue is discussed in much greater detail in Section~\ref{s:sizing}.
     \begin{tabular}{l  c  c  c} 
         \hline \hline
         Design Variable &  Value\\ \hline \hline
-        Max. Pod Mach & .9 \\ 
-        Pod Bypass Mach & .95\\
-        Compressor 1 Inlet Mach & .6\\ 
+        Max. Pod Mach & 0.9 \\ 
+        Pod Bypass Mach & 0.95\\
+        Compressor 1 Inlet Mach & 0.6\\ 
         Compressor 1 Pressure Ratio & 12.47\\ 
         Tube Static Pressure (Pa) & 99 \\ \hline
     \end{tabular}
@@ -170,11 +170,11 @@ In the original Hyperloop proposal, the size of the passenger pod and the travel
 free to vary within reasonable ranges of each other. Two different configurations are proposed:
 a smaller pod for passengers and a larger pod for both passengers and cargo.
 The two configurations had slightly different ratios of tube area to pod area with overall dimensions summarized 
-in Table \ref{t:hyperbase} . 
+in Table \ref{t:hyperbase}. 
 
 \begin{table}
   \centering
-  \caption{Dimensions of the passenger and cargo hyperloop designs from the original proposal. }
+  \caption{Dimensions of the passenger and cargo Hyperloop designs from the original proposal. }
   \label{t:hyperbase}
   \begin{tabular}{l c c}
     \hline
@@ -183,8 +183,8 @@ in Table \ref{t:hyperbase} .
     $A_{tube}$, $m^2$           &        3.87      &     8.55  \\
     $A_{pod}$, $m^2$             &        1.4       &     4.0   \\ 
     $A_{bypass}$, $m^2$          &        2.47      &     4.55  \\ 
-    $\frac{A_{bypass}}{A_{tube}}$ &        .64       &     .53   \\
-    Max Mach                      &        .95       &     .95   \\
+    $\frac{A_{bypass}}{A_{tube}}$ &        0.64       &     0.53   \\
+    Max Mach                      &        0.95       &     0.95   \\
     \hline
   \end{tabular}
 \end{table}
@@ -198,7 +198,7 @@ in Table \ref{t:hyperbase} .
 
 Smaller tube sizes are preferable because they provide lower construction costs. However, 
 the tube size is coupled to the speed of the air as it passes around a pod of a given size. 
-To understand this coupling consider the following simplified situation: assume that the passenger pod is sealed with a fairing
+To understand this coupling, consider the following simplified situation: assume that the passenger pod is sealed with a fairing
 instead of an inlet. Figure \ref{f:ClosedPod} depicts this situation with the pod
 traveling through a frictionless tube from right to left, at some Mach number less than 1, through a stationary mass of air. 
 For the purposes of analysis it is more convenient to consider the air speed relative to the pod, 
@@ -229,7 +229,7 @@ Figure \ref{f:choked-flow} show the effect of Eq.~(\ref{e:a-over-astar}) over a 
 For all values of $M_{pod}$, shown as a family of curves, the minimum required $\frac{A_{bypass}}{A_{tube}}$ occurs exactly at $M_{bypass}=1$.
 In other words, 
 $M_{bypass}=1$ will always give the smallest possible $A_{bypass}$ (and hence $A_{tube}$) for a given 
-$M_{pod}$ and $A_{pod}$. Thus $A_{tube}$ can not be treated as an independent design variable without over-constraining the problem.
+$M_{pod}$ and $A_{pod}$. Thus $A_{tube}$ cannot be treated as an independent design variable without over-constraining the problem.
 If $A_{tube}$ is forced to be smaller than this minimum value, not all the relative mass flow can pass freely around the pod. This excess 
 flow would accumulate to the left of the pod in Fig. \ref{f:ClosedPod},
 with the pod acting like a piston: pressurizing the air in front of it. 
@@ -237,8 +237,8 @@ with the pod acting like a piston: pressurizing the air in front of it.
 Furthermore, Fig. \ref{f:choked-flow} also shows that $\frac{A_{bypass}}{A_{tube}}$ 
 increases with increasing $M_{pod}$. So the faster the pod travels, the larger $A_{bypass}$ 
 must become relative to the tube area, leaving less area for the pod. For $M_{pod} = 1$ , $\frac{A_{bypass}}{A_{tube}}$ must 
-equal 1 as well, forcing $A_{pod}$ to be 0. Note that the values from Table \ref{t:hyperbase} gives area ratios around .6, 
-which yields a much lower maximum pod speed of about Mach .3-.4 for a pod without an inlet and compression system. 
+equal 1 as well, forcing $A_{pod}$ to be 0. Note that the values from Table \ref{t:hyperbase} translate to area ratios around 0.6, 
+which yields a much lower maximum pod speed of about Mach 0.3-0.4 for a pod without an inlet and compression system. 
 
 \begin{figure}[hbtp]
 \centering
@@ -267,7 +267,7 @@ $\frac{A_{bypass}}{A_{tube}}$ and ${M_{pod}}$.
 \end{figure}
 
 However, in order to achieve reasonable efficiency from the compression system, the Mach number of the flow at the compressor face
-must be limited to less than about .65. For $M_{pod}$ greater than .65, a diffuser must be added to the Hyperloop 
+must be limited to less than about 0.65. For $M_{pod}$ greater than 0.65, a diffuser must be added to the Hyperloop 
 which will slow the air down before it enters the compressor. As depicted in Fig. \ref{f:OpenPod}, diffusing the flow 
 requires expanding the area; $A_{diffused}$ must be greater than $A_{tube,c}$. Unfortunately this means that
 $A_{bypass}$ must be smaller than $A_{tube\ B}$, and some acceleration of the flow around the pod will occur.
@@ -335,7 +335,7 @@ Combined with the mission profile described below, these requirements impact bat
 \end{figure}
 
 The notional velocity profile described in the original proposal, shown by the solid line in Fig. \ref{f:velocity},
-is programatically modified based on the recomputed maximum velocity of the pod. The starting and final velocities of the
+is programmatically modified based on the recomputed maximum velocity of the pod. The starting and final velocities of the
 mission profile are dictated by maximum allowable acceleration loads, while the highest plateau is governed by the
 choked flow limit. Therefore, the fastest portion of the trip, illustrated in red, is modified as the simulation runs and re-computes pod speed.
 Reducing the maximum speed also increases the total mission time,
@@ -343,7 +343,7 @@ pushing the final mission segment out further as shown by the dashed lines.
 The integrated area under the curve represents the total length of the tube, which remains constant as the max speed varies.
 The speed constraints outlined earlier increase total mission time on the order of five minutes,
 however this will ultimately depend on the chosen tube diameter.
-Despite the increased mission time, the slower speeds would also allow for more forigiving acceleration loads around turns.
+Despite the increased mission time, the slower speeds would also allow for more forgiving acceleration loads around turns.
 Multiplying the calculated mission time by the maximum instantaneous compressor power consumption (plus a 30\% safety margin)
 results in an overall battery storage requirement.
 
@@ -358,7 +358,7 @@ results in an overall battery storage requirement.
 The necessary on-board battery energy was found to be negatively correlated to the max pod speed,
 as shown by the green curve in Fig. \ref{f:battery}.
 The maximum instantaneous compressor requirements and total mission time
-are also directly overlayed in red and blue respectively. 
+are also directly overlaid in red and blue respectively. 
 The negative slope of the green battery curve indicates that total mission time falls
 faster than the compressor power requirements increase.
 Although traveling at higher speeds draws more energy, the system is operated for a shorter period of time.
@@ -648,7 +648,7 @@ of 9.7 \degree F.
 
 
 The sub-iteration of the thermal discipline then feeds back into the overall
-hyperloop convergence loop, both affected by and contributing to the
+Hyperloop convergence loop, both affected by and contributing to the
 compression cycle, creating feedback “C” in Fig. \ref{f:hyperloopXDSM}.
 The analysis suggests that the dominant heating factors are a direct result of
 the massive tube structure, with only 5\% of the heat contributed from the pods.
@@ -673,7 +673,7 @@ the two water-based heat exchangers originally prescribed for thermal management
 Although this work identifies some necessary refinements to the Hyperloop design, the core 
 concept remains potentially feasible and warrants continued investigation. 
 This work emphasizes the importance of maintaining a systems-level approach
-and provides toolsets capable of manging the growing complexity.
+and provides toolsets capable of managing the growing complexity.
 The modeling platform is intended to serve as an easily accessible baseline that is straightforward to
 expand and delve deeper into this unique multidisciplinary endeavor.
 

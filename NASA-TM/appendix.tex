@@ -21,14 +21,14 @@ The entire source code for both the analysis and the generated figures can be fo
 
 Online documentation can be found at:
 \url{<http://openmdao-plugins.github.io/Hyperloop>}
-This plugin is designed to be a jumping off point for community contributions to help crowd source the development of the hyperloop
+This plugin is designed to be a jumping off point for community contributions to help crowd source the development of the Hyperloop
 concept. The readme on the github repository walks through basic installation steps, further support can be found through the main
 OpenMDAO docs. The basic structure of an assembly is explained in the usage section of these docs.
 
 \subsection{Usage Example}
 
-To use the hyperloop model, run the file $src\backslash hyperloop\backslash hyperloop\_ sim.py$
-in the hyperloop repository. 
+To use the Hyperloop model, run the file $src\backslash hyperloop\backslash hyperloop\_ sim.py$
+in the Hyperloop repository. 
 Each assembly is structured similarly and the following walk-through shows the basic layout for setting up a model.
 
 The file starts out with some library imports and the Input/Output variable definition of the HyperloopPod assembly.
@@ -53,12 +53,12 @@ The final ‘’‘if \_\_name\_\_==”\_\_main\_\_”:’‘’ section works t
 
 \section{Subsystem Modeling Theory and Potential Future Road Map} \label{app:future}
 
-The current model of the hyperloop focuses on some of the primary sub-systems that operate within the pod. However, there is much more
-analysis that needs to be done to build a complete hyperloop model.
+The current model of the Hyperloop focuses on some of the primary sub-systems that operate within the pod. However, there is much more
+analysis that needs to be done to build a complete Hyperloop model.
 For the sake of conciseness, each section serves as a general summary. The reader is recommended to refer to the actual source code and
 included documentation for full implementation details. The current model omits economic, structural, safety, and infrastructure
 considerations; these areas become more prominent once the core engineering concept is deemed sufficiently feasible. These aspects are
-equally important to the overall design and they represent the next required step in producing a viable hyperloop design concept.
+equally important to the overall design and they represent the next required step in producing a viable Hyperloop design concept.
 Below, is a brief summary in which various disciplines are suggested as logical next steps for the engineering aspects of the analysis.
 
 \begin{figure}[hbtp]
@@ -70,8 +70,8 @@ Below, is a brief summary in which various disciplines are suggested as logical 
 
 \subsection{System Design Optimization}
 The current baseline appears to be a feasible design, but the design space is large (and will grow with additional models) and needs to be
-more fully explored. Overall, the goal of the hyperloop design should be to find the right compromise between maximum passenger
-throughput, minimum travel time, and minimum cost per trip. The following are some major open questions about the hyperloop design
+more fully explored. Overall, the goal of the Hyperloop design should be to find the right compromise between maximum passenger
+throughput, minimum travel time, and minimum cost per trip. The following are some major open questions about the Hyperloop design
 space:
 
 1) What is the relationship between overall energy usage and tube pressure? Would a slightly higher pressure lower the overall energy
@@ -122,11 +122,11 @@ Both of these aspects need to be modeled and incorporated into the system models
 
 
 \subsection{Solar Power Generation}
-One of the proposed features of the hyperloop concept is its near net-zero energy consumption, via the inclusion of solar panels along the
+One of the proposed features of the Hyperloop concept is its near net-zero energy consumption, via the inclusion of solar panels along the
 length of the tubes. Models are needed to predict, based on geographical location, weather, and time of year, how much power could be
 produced on an ongoing basis from such a solar panel system.
 
-The power production and power consumption of the hyperloop system need to be compared. Even assuming you can reach a net zero
+The power production and power consumption of the Hyperloop system need to be compared. Even assuming you can reach a net zero
 energy usage on an average basis, the timing of the production and consumption has a strong impact on how much energy storage is
 necessary in the overall system. This will have an impact on its overall cost.
 
@@ -166,11 +166,11 @@ Given:
 
 -Input and output temperatures are known for each fluid
 
--Temperature change across the heat exchanger cannot be so large that Cp changes significantly
+-Temperature change across the heat exchanger cannot be so large that $C_{p}$ changes significantly
 
 -Rigorously defined for double-pipe(or tubular) heat exchanger
 
-With a chosen cross-sectional area of pipe and annulus, and known Q and mdot, the velocity of each fluid can be determined.
+With a chosen cross-sectional area of pipe and annulus, and known $Q$ and $\dot{m}$, the velocity of each fluid can be determined.
 
 \begin{equation*}
 \dot{m} = \rho A V     ...therfore...        V  = \frac{Q} {\rho A C_{p} (T_{out} - T_{in})}
@@ -182,18 +182,18 @@ D_{h} = \frac{4 A_{f}} {P_{f}}  = \frac{4 \pi (ID_{a}^2-OD_{p}^2)} {4 \pi (ID_{a
 \begin{equation*}
 D_{\varepsilon} = \frac{4 A_{f}} {P_{ht}}   =  \frac{4 \pi (ID_{a}^2-OD_{p}^2)} {4 \pi (ID_{a}*OD_{p})} = \frac{ID_{a}^2-OD_{p}^2}{OD_{p}}
 \end{equation*}
-Based on the geometry, kinematic viscosity  $\upsilon$ , dynamic viscosity  $\mu$ , thermal conductivity k, and velocity of the fluids the
+Based on the geometry, kinematic viscosity  $\upsilon$ , dynamic viscosity  $\mu$ , thermal conductivity $k$, and velocity of the fluids the
 following non-dimension values can be calculated
 
-Reynolds Number: (inertial forces/ viscous forces)  Re = $\frac{V D_{h}} {\upsilon}$
+Reynolds Number: (inertial forces/ viscous forces)  $Re = \frac{V D_{h}} {\upsilon}$
 
-Prandtl Number: (viscous diffusion rate/ thermal diffusion rate)  Pr = $\frac{C_{p} \mu} {k}$
+Prandtl Number: (viscous diffusion rate/ thermal diffusion rate)  $Pr = \frac{C_{p} \mu} {k}$
 
 Based on the flow regimes determined above, the Nusselt Number.. can be calculated. The Dittus-Boelter equation is used in this case,
 
-Nusselt Number: (convective heat transfer / conductive heat transfer)  Nu = $0.023*(Re^{4/5})*(Pr^{n})$ where n = 0.4 if the fluid is heated, n = 0.3 if the fluid is cooled.
+Nusselt Number: (convective heat transfer / conductive heat transfer)  $Nu = 0.023*(Re^{4/5})*(Pr^{n})$ where n = 0.4 if the fluid is heated, n = 0.3 if the fluid is cooled.
 
-Subsequently the convective heat transfer coefficient of each fluid can be determined,  h = $\frac{Nu*k} {D_{\varepsilon}}$
+Subsequently the convective heat transfer coefficient of each fluid can be determined,  $h = \frac{Nu*k} {D_{\varepsilon}}$
 
 All of these terms can then be used to calculate the overall heat transfer coefficient of the system,
 
