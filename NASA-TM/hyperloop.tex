@@ -497,7 +497,7 @@ the total temperature of the air exiting the pod nozzles may be written as a fun
 of the compressor’s pressure ratio ($\pi_{c}$) and adiabatic efficiency ($\eta_{c}$):
 
 \begin{equation}
-T_{t,exit} = T_{t,tube} + \Bigg[ 1 + \frac{1}{\eta_{c}} \Big[ \pi_{c}^{\frac{\gamma-1}{\gamma}}- 1 \Big] \Bigg]
+T_{t,exit} = T_{t,tube} \Bigg[ 1 + \frac{1}{\eta_{c}} \Big[ \pi_{c}^{\frac{\gamma-1}{\gamma}}- 1 \Big] \Bigg]
 \end{equation}
 
 The heating rate due to all of the pods operating in the tube may be estimated by
@@ -615,12 +615,11 @@ around the model’s nominal values as listed in Table \ref{tab:montecarlo}.
         \hline
         Variable & Mode & Model & Min & Max & Std. Dev\\ \hline \hline
         $T_{amb}$ & 305 \degree K & Normal & - & - & 6 \\ 
-        $G$ & $1000\frac{W}{m^2}$ & Triangular & $200\frac{W}{m^2}$ & $1000\frac{W}{m^2}$ & - \\
+        $G$ & $1000\frac{W}{m^{2}}$ & Triangular & $200\frac{W}{m^{2}}$ & $1000\frac{W}{m^{2}}$ & - \\
         $\rho$ & 0.5 & Triangular & 0.4 & 0.9 & - \\
         $\epsilon$ & 0.5 & Triangular & 0.4 & 0.9 & - \\
         $\eta_{c}$ & 0.69 & Triangular & 0.6 & 0.8 & - \\
         $n$ & 34 & Triangular & - & - & 2 \\
-        %$D_{o,tube}$ & 7.3ft & Normal & 7.0ft & 7.6ft & - \\
         $c_{solar}$ & 0.7 & Triangular & 0.5 & 1.0 & - \\
         $c_{conv}$ & 1.0 & Triangular & 0.9 & 3.0 & - \\
         \hline
