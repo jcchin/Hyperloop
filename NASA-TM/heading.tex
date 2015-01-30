@@ -79,23 +79,24 @@
   {\def\wilh@nomsection{section}}
   {\def\wilh@nomsection{chapter}}
 
-\def\thenomenclature{%
-  \begin{multicols}{2}[% 2 column layout
-    \csname\wilh@nomsection\endcsname*{\nomname}
-    \if@intoc\addcontentsline{toc}{\wilh@nomsection}{\nomname}\fi
-    \nompreamble]
-  \list{}{%
-    \labelwidth\nom@tempdim
-    \leftmargin\leftmargini
-    \advance\leftmargin\leftmargini
-    \itemsep\nomitemsep
-    \let\makelabel\nomlabel}%
-}
-\def\endthenomenclature{%
-  \endlist
-  \end{multicols}
-  \nompostamble}
-\makeatother
+
+%\def\thenomenclature{%
+%  \begin{multicols}{2}[% 2 column layout
+%    \csname\wilh@nomsection\endcsname*{\nomname}
+%    \if@intoc\addcontentsline{toc}{\wilh@nomsection}{\nomname}\fi
+%    \nompreamble]
+%  \list{}{%
+%    \labelwidth\nom@tempdim
+%    \leftmargin\leftmargini
+%    \advance\leftmargin\leftmargini
+%    \itemsep\nomitemsep
+%    \let\makelabel\nomlabel}%
+%}
+%\def\endthenomenclature{%
+%  \endlist
+%  \end{multicols}
+%  \nompostamble}
+%\makeatother
 
 %these seemed to be necessary with minted... not sure what they do..
 \makeatletter
@@ -145,6 +146,6 @@ although additional engineering and economic analyses are markedly necessary bef
 \bibliographystyle{unsrt} %sorted by appearence, consider using natbib?
 \bibliography{bibliography}
 
-\subfile{appendix}
+%\subfile{appendix}
 
 \end{document}
