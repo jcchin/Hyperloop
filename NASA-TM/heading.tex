@@ -1,51 +1,34 @@
-%  sample input file for using the NASA.cls LaTeX class
-%  this distribution is handy for formatting TM, TP, CR, etc.
-%
-%  $Id: sample.tex,v 1.18 2009/08/10 17:22:22 wawood Exp $
 
 %  next 2 lines pull in the NASA.cls file, put options between []
 \documentclass[]             % options: RDPonly, coveronly, nocover
-{NASA}                       %   plus standard article class options
+{aiaa-tc}                       %   plus standard article class options
 
 %  Fill in the following catagories between the braces {}
-\title{A Public Platform for the Optimization of the Hyperloop Concept}
-\author{Jeffrey C. Chin and Justin S. Gray} % list all the author names for
-                                    % the RDP
+\title{Open-Source Conceptual Sizing Models for the Hyperloop Passenger Pod}
 
-\AuthorAffiliation{Jeffrey C. Chin\\                      % list the authors
-  Glenn Research Center, Cleveland, Ohio \\[10pt]   % with affiliations
-  Justin S. Gray\\                                          % for cover page
-  Glenn Research Center, Cleveland, Ohio\\[10pt] % with affiliations
- }
-\NasaCenter{Glenn Research Center\\Cleveland, Ohio 44135-3127}
-\Type{TM}                    % TM, TP, CR, CP, SP, TT
-\SubjectCategory{64}         % two digit number
-\LNumber{12456}              % Langley L-number
-\Number{217743}              % Report number
-\Month{03}                   % two digit number
-\Year{2014}                  % four digit number
-\SubjectTerms{Hyperloop, openMDAO, optimization, SpaceX, Tesla}     % 4-5 comma separated words
-\Pages{19}                   % all the pages from the front to back covers
-\DatesCovered{}              % 10/2000--9/2002
-\ContractNumber{}            % NAS1-12345
-\GrantNumber{}               % NAG1-1234
-\ProgramElementNumber{}
-\ProjectNumber{}             % NCC1-123
-\TaskNumber{}                % Task 123
-\WorkUnitNumber{}            % 123-45-67-89
-\SupplementaryNotes{}
-\Acknowledgment{Thanks to Jeff Berton, Scott Jones, Chris Heath and Chris Snyder for contributing their expertise.}
+\author{
+  Jeffrey C. Chin%
+     \footnote{Aerospace Engineer, Propulsion Systems Analysis Branch, Mail Stop 5-10, AIAA Member},
+  \ Justin S. Gray\footnotemark[\value{footnote}] ,%
+     %\thanks{Aerospace Engineer, MDAO Branch, Mail Stop 5-10, AIAA Member}
+  \ Scott M. Jones\footnotemark[\value{footnote}] ,%
+     %\thanks{Aerospace Engineer, MDAO Branch, Mail Stop 5-10, AIAA Member}
+  \ Jeffrey J. Berton\footnotemark[\value{footnote}]%
+    %\thanks{Aerospace Engineer, MDAO Branch, Mail Stop 5-10, AIAA Member}
+   \\
+  {\normalsize\itshape
+  NASA Glenn Research Center, Cleveland, OH}
+}
 
-\abstract{In order to develop a comprehensive system model of the Hyperloop transportation system, first steps have been taken in constructing
-various baseline models as outlined in Elon Musk's proposal. A completely open-source multidisciplinary framework is provided as a starting point
-and the system's design, modeling, and analysis is approached from an aeronautic perspective. The modeling is
-focused on the compressor cycle analysis, heat estimates, and capsule geometry. From this analysis, physical limitations of the tube diameter and
-capsule geometry have been identified that are not vetted in the original proposal. The results indicate that travel speeds around Mach 0.8 are
-attainable, with a tube inner diameter approximately two times larger than originally proposed. In addition, some basic sizing estimates are made to
-quantify the effect of the maximum speed on battery sizing and cooling requirements. The estimated on-board power
-requirement of 350-425 kw-hrs is in agreement with Musk's original proposal. Conversely, preliminary cooling calculations indicate
- steam tanks to be an ineffective and unnecessary mechanism for managing heat loads between the tube and surrounding environment.}  
- % suggested 200 words max
+% Define commands to assure consistent treatment throughout document
+\newcommand{\eqnref}[1]{(\ref{#1})}
+\newcommand{\class}[1]{\texttt{#1}}
+\newcommand{\package}[1]{\texttt{#1}}
+\newcommand{\file}[1]{\texttt{#1}}
+\newcommand{\BibTeX}{\textsc{Bib}\TeX}
+
+\setlength{\abovecaptionskip}{0pt}
+\setlength{\belowcaptionskip}{0pt}
 
 \usepackage{minted} %syntax highlighting
 \usepackage{color} %syntax highlighting
@@ -58,9 +41,62 @@ requirement of 350-425 kw-hrs is in agreement with Musk's original proposal. Con
 \usepackage{cleveref} %section references
 \usepackage[all]{hypcap} %figure references point to top of figure (must come after hyperref)
 \usepackage{nomencl} %nomenclature
+\usepackage{subfiles} %split sections into separate docs
+
+\usepackage{setspace} %Pro­vides sup­port for set­ting the spac­ing be­tween lines in a doc­u­ment
+\usepackage{wrapfig} %Al­lows fig­ures or ta­bles to have text wrapped around them.
+\usepackage{caption} %The cap­tion pack­age pro­vides many ways to cus­tomise the cap­tions in float­ing en­vi­ron­ments like fig­ure and ta­ble
+\usepackage{lscape} %Mod­i­fies the mar­gins and ro­tates the page con­tents but not the page num­ber.
+\usepackage{appendix}
+\usepackage{listings} %Code
+\usepackage[section]{placeins} %De­fines a \FloatBar­rier com­mand, be­yond which floats may not pass; 
+\usepackage[superscript]{cite} %The pack­age sup­ports com­pressed, sorted lists of nu­mer­i­cal ci­ta­tions
+\usepackage{esdiff} %The pack­age makes writ­ing deriva­tives very easy.
+\usepackage{bm} %The bm pack­age de­fines a com­mand \bm which makes its ar­gu­ment bold. (math)
+\usepackage{tabulary} %wider table
+\usepackage{gensymb} %degree symbol
+\usepackage{booktabs} % en­hances the qual­ity of ta­bles
+
+\lstset{frame=single}
+\newcommand{\txt}{\textrm}
+
+\newcommand{\cent}{{\mathrm{c}\mkern-6.5mu{\mid}}}
+
+\captionsetup[figure]{margin=5pt,font=small,labelfont=bf,textfont=bf,justification=justified,}
+%\captionsetup[wrapfigure]{margin=5pt,font=small,labelfont=bf,justification=justified,singlelinecheck=off}
+\captionsetup[table]{margin=5pt,font=small,labelfont=bf,textfont=bf,justification=justified,position=top}
+
+\bibliographystyle{aiaa}
+
+\usepackage{lettrine} %The let­trine pack­age sup­ports var­i­ous dropped cap­i­tals styles
+\usepackage{verbatim} %reimplements verbatim, block comments
 
 %nomenclature
 \makenomenclature
+\usepackage{multicol}
+\makeatletter
+\@ifundefined{chapter}
+  {\def\wilh@nomsection{section}}
+  {\def\wilh@nomsection{chapter}}
+
+\def\thenomenclature{%
+  \begin{multicols}{2}[% 2 column layout
+    \csname\wilh@nomsection\endcsname*{\nomname}
+    \if@intoc\addcontentsline{toc}{\wilh@nomsection}{\nomname}\fi
+    \nompreamble]
+  \list{}{%
+    \labelwidth\nom@tempdim
+    \leftmargin\leftmargini
+    \advance\leftmargin\leftmargini
+    \itemsep\nomitemsep
+    \let\makelabel\nomlabel}%
+}
+\def\endthenomenclature{%
+  \endlist
+  \end{multicols}
+  \nompostamble}
+\makeatother
+
 %these seemed to be necessary with minted... not sure what they do..
 \makeatletter
 \color{black}
@@ -71,6 +107,40 @@ requirement of 350-425 kw-hrs is in agreement with Musk's original proposal. Con
 \crefname{appsec}{Appendix}{Appendices}
 \begin{document}
 
+\maketitle
+
+\begin{abstract}
+Hyperloop is a new mode of transportation proposed as an alternative to California's high speed rail project,
+with the intended benefits of higher performance at lower overall costs.
+It consists of a passenger pod traveling through a tube under a light vacuum and suspended on air bearings.
+The pod travels up to transonic speeds resulting in a 35 minute travel time
+between the intended route from Los Angeles and San Francisco.
+Of the two variants outlined, the smaller system includes a 1.1 meter tall passenger
+capsule traveling through a 2.2 meter tube at 700 miles per hour.
+The passenger pod features water-based heat exchangers as well as an on-board compression
+system that reduces the aerodynamic drag as it moves through the tube.
+Although the original proposal looks very promising,
+it assumes that tube and pod dimensions are independently sizable without fully acknowledging
+the constraints of the compressor system on the pod geometry.
+This work focuses on the aerodynamic and thermodynamic interactions between the two largest systems: the tube and the pod.
+Using open-source toolsets, a new sizing method is developed based on one-dimensional thermodynamic relationships
+that accounts for the strong interactions between these sub-systems.
+These additional considerations require a tube nearly twice the size originally considered
+and limit the maximum pod travel speed to about 620 miles per hour.
+Although the results indicate that Hyperloop will need to be larger and slightly slower than originally intended,
+the estimated travel time only increases by approximately five minutes, so the overall performance is not dramatically affected.
+In addition, the proposed on-board heat exchanger is not an ideal solution
+to achieve reasonable equilibrium air temperatures within the tube.
+Removal of this subsystem represents a potential reduction in weight, energy requirements and complexity of the pod.
+In light of these finding, the core concept still remains a compelling possibility,
+although additional engineering and economic analyses are markedly necessary before a more complete design can be developed.
+\\
+\\
+\\
+\\
+
+\end{abstract}  
+Revision: Oct, 2015 - This version fixes a typo in equation 1 where the sign on the exponent was reversed.
 \setcounter{secnumdepth}{1}
 \setcounter{tocdepth}{1}
 %\tableofcontents
